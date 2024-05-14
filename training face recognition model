@@ -1,0 +1,47 @@
+import cv2
+import os
+import numpy as np
+
+p=[]
+for i in os.listdir(r'ENTER THE PATH OF YOUR DOCUMENTS'):
+  p.append(i)
+print(p)
+
+haar_cascade=cv2.CascadeClassifier('haar_face.xml')#initialising your haar_face file
+DIR=r'ENTER THE PATH OF YOUR DOCUMENTS HERE AGAIN'
+
+features=[]
+labels=[]
+
+def create_train():
+  for person in p:
+      path=os.path.join(DIR,person)
+      label=p.index(person)
+      for img in os.listdir(path):
+          img_path=os.path.join(path,img)
+
+          img_array=cv2.imread(img_path)
+          gray=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+          faces_rect=haar_cascade.detectMultiScale(gray,scaaleFactor=1.1,minNeighbors=4)
+          for (x,y,w,h) in faces_rect:
+              faces_roi=gray[y:y+h,x:x+w]
+              features.append(faces_roi)
+              labels.append(label) #index of the original list 'p'
+create_train()  
+print('Training complete----')
+print(f'Length of features={len(features)}')
+print(f'Length of labels={len(labels)}')
+
+features=np.array(features,dtype='object')
+labels=np.array(labels)
+
+face_recognizer=cv2.face.LBPHFaceRecognizer_create() # initializing your face recognizer. Ensure you have downloaded the opencv-contrib_python module through the command propmt and import it to your project. Use pip install opencv-contrib-python command to install
+#train the recognizer on the features and labels
+face_recognizer.train(features,labels)
+face._recognizer.save('face_trained.yml')  #save the trained model to a YML file in order to use it elsewhere(universally)
+
+np.save('features.npy',features)
+np.save('labels.npy',labels)
+
+  
