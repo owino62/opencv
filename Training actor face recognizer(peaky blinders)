@@ -1,0 +1,50 @@
+import cv2
+import numpy as np
+import os
+
+p=[]
+for i in os.listdir(r'C:\Users\agola\Desktop\PEAKY BLINDERS'):
+    p.append(i)
+print(p)
+
+haar_cascade=cv2.CascadeClassifier('haar_face.xml')
+DIR=r'C:\Users\agola\Desktop\PEAKY BLINDERS'
+features=[]
+labels=[]
+
+def create_train():
+    for person in p:
+        path=os.path.join(DIR,person)
+        label=p.index(person)
+
+
+        for img in os.listdir(path):
+            img_path=os.path.join(path,img)
+
+            img_array=cv2.imread(img_path)
+            gray=cv2.cvtColor(img_array,cv2.COLOR_BGR2GRAY)
+
+            faces_rect=haar_cascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=4)
+            for (x,y,w,h) in faces_rect:
+                faces_roi=gray[y:y+h,x:x+w]
+                features.append(faces_roi)
+                labels.append(label)
+
+create_train()
+
+print('Training is complete!---')
+print(f'The length of the features= {len(features)}')
+print(f'The length of labels= {len(labels)}')
+
+features=np.array(features,dtype='object')
+labels=np.array(labels)
+
+face_recognizer=cv2.face.LBPHFaceRecognizer_create()
+face_recognizer.save('face_trained2.yml')
+
+np.save('features2.npy',features)
+np.save('labels2.npy',labels)
+
+
+
+
